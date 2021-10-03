@@ -3214,7 +3214,7 @@ static bool _mons_lunges(monster& mons, coord_def delta)
 
 
     const string name = foe->name(DESC_THE);
-    const string msg = make_stringf(" lunges at %s as %s move%s adjacent!",
+    const string msg = make_stringf(" attacks %s as %s move%s adjacent!",
                                     name.c_str(),
                                     mons.pronoun(PRONOUN_SUBJECTIVE).c_str(),
                                     mons.pronoun_plurality() ? "" : "s");
