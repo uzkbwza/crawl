@@ -194,7 +194,7 @@ static void _handle_manticore_barbs(monster& mons)
 }
 
 // Returns true iff the monster does nothing.
-static bool _handle_ru_redirection(monster &mons, monster **new_target)
+static bool _handle_ru_melee_redirection(monster &mons, monster **new_target)
 {
     // Check to see if your religion redirects the attack
     if (!does_ru_wanna_redirect(mons))
@@ -229,6 +229,21 @@ static bool _handle_ru_redirection(monster &mons, monster **new_target)
         }
     }
     return false;
+}
+
+static void _melee_attack_player(monster &mons, monster* ru_target)
+{
+    if (ru_target)
+    {
+        // attack that target
+        mons.target = ru_target->pos();
+        mons.foe = ru_target->mindex();
+        mprf(MSGCH_GOD, "You redirect %s's attack!",
+             mons.name(DESC_THE).c_str());
+        fight_melee(&mons, ru_target);
+    }
+    else
+        fight_melee(&mons, &you);
 }
 
 static bool _swap_monsters(monster& mover, monster& moved)
@@ -1928,26 +1943,14 @@ void handle_monster_move(monster* mons)
                     mons->foe = MHITYOU;
                     mons->target = you.pos();
 
-                    if (_handle_ru_redirection(*mons, &new_target))
+                    if (_handle_ru_melee_redirection(*mons, &new_target))
                     {
                         mons->speed_increment -= non_move_energy;
                         DEBUG_ENERGY_USE("_handle_ru_redirection()");
                         return;
                     }
                 }
-
-                if (new_target)
-                {
-                    // attack that target
-                    mons->target = new_target->pos();
-                    mons->foe = new_target->mindex();
-                    mprf(MSGCH_GOD, "You redirect %s's attack!",
-                         mons->name(DESC_THE).c_str());
-                    fight_melee(mons, new_target);
-                }
-                else
-                    fight_melee(mons, &you);
-
+                _melee_attack_player(*mons, new_target);
                 _handle_battiness(*mons);
                 DEBUG_ENERGY_USE("fight_melee()");
                 mmov.reset();
@@ -3203,7 +3206,7 @@ static bool _mons_lunges(monster& mons, coord_def delta)
         return false;
     if (!one_chance_in(6))
         return false;
-    const actor* foe = mons.get_foe();
+    actor* foe = mons.get_foe();
     ASSERT(foe); // else, how is foe distance <= 0?
     coord_def old_pos = mons.pos() - delta;
     if (adjacent(old_pos, foe->pos()))
@@ -3219,10 +3222,24 @@ static bool _mons_lunges(monster& mons, coord_def delta)
 
     const energy_use_type move_type = _get_swim_or_move(mons);
     const int move_cost = mons.energy_cost(move_type);
-    const int attack_cost = mons.energy_cost(EUT_ATTACK); // wrong - todo
-    mons.speed_increment -= max(move_cost, attack_cost);
 
-    return true; // TODO
+    const int old_speed = mons.speed_increment;
+    if (foe->is_player())
+    {
+        monster *ru_target = nullptr;
+        if (_handle_ru_melee_redirection(mons, &ru_target))
+        {
+            mons.speed_increment -= move_cost; // XXX: should be non_move_energy
+            return true;
+        }
+
+        _melee_attack_player(mons, ru_target);
+    } else
+        fight_melee(&mons, foe);
+
+    const int speed_after_moving = old_speed - move_cost;
+    mons.speed_increment = min(mons.speed_increment, speed_after_moving);
+    return true;
 }
 
 static bool _do_move_monster(monster& mons, const coord_def& delta)
