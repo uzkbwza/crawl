@@ -3184,6 +3184,34 @@ static bool _monster_swaps_places(monster* mon, const coord_def& delta)
     return false;
 }
 
+static bool _mons_lunges(monster& mons, coord_def delta)
+{
+    if (mons_is_batty(mons) || mons.foe_distance() > 1)
+        return false;
+    if (!one_chance_in(6))
+        return false;
+    const actor* foe = mons.get_foe();
+    ASSERT(foe); // else, how is foe distance <= 0?
+    coord_def old_pos = mons.pos() - delta;
+    if (adjacent(old_pos, foe->pos()))
+        return false;
+
+
+    const string name = foe->name(DESC_THE);
+    const string msg = make_stringf(" lunges at %s as %s move%s adjacent!",
+                                    name.c_str(),
+                                    mons.pronoun(PRONOUN_SUBJECTIVE).c_str(),
+                                    mons.pronoun_plurality() ? "" : "s");
+    simple_monster_message(mons, msg.c_str());
+
+    const energy_use_type move_type = _get_swim_or_move(mons);
+    const int move_cost = mons.energy_cost(move_type);
+    const int attack_cost = mons.energy_cost(EUT_ATTACK); // wrong - todo
+    mons.speed_increment -= max(move_cost, attack_cost);
+
+    return true; // TODO
+}
+
 static bool _do_move_monster(monster& mons, const coord_def& delta)
 {
     const coord_def f = mons.pos() + delta;
@@ -3266,6 +3294,7 @@ static bool _do_move_monster(monster& mons, const coord_def& delta)
             }
         } // done door-eating jellies
     }
+    // This appears to be the real one, ie where the movement occurs:
 
     // The monster gave a "comes into view" message and then immediately
     // moved back out of view, leaing the player nothing to see, so give
@@ -3307,8 +3336,8 @@ static bool _do_move_monster(monster& mons, const coord_def& delta)
 
     _handle_manticore_barbs(mons);
 
-    // This appears to be the real one, ie where the movement occurs:
-    _swim_or_move_energy(mons);
+    if (!_mons_lunges(mons, delta))
+        _swim_or_move_energy(mons);
 
     return true;
 }
