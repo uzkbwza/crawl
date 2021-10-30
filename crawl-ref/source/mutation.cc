@@ -19,6 +19,7 @@
 #include "cio.h"
 #include "coordit.h"
 #include "dactions.h"
+#include "database.h" // getLongDescription
 #include "delay.h"
 #include "describe.h"
 #include "english.h"
@@ -1130,23 +1131,30 @@ class MutationMenu : public Menu
 {
 private:
     vector<string> fakemuts;
+    vector<mutation_type> muts;
 public:
     MutationMenu()
         : Menu(MF_SINGLESELECT | MF_ANYPRINTABLE | MF_ALLOW_FORMATTING),
-          fakemuts(_get_fakemuts(false))
+          fakemuts(_get_fakemuts(false)),
+          muts( _get_ordered_mutations())
     {
         set_highlighter(nullptr);
         set_title(new MenuEntry("Innate Abilities, Weirdness & Mutations",
                                 MEL_TITLE));
         update_entries();
         update_more();
+        on_single_selection = [](const MenuEntry& item)
+        {
+            if (!item.data) return true;
+            const mutation_type mut = *((mutation_type*)(item.data));
+            describe_mutation(mut);
+            return true;
+        };
     }
 
 private:
     void update_entries()
     {
-        vector<mutation_type> muts = _get_ordered_mutations();
-
         for (const auto &fakemut : fakemuts)
         {
             MenuEntry* me = new MenuEntry(fakemut, MEL_ITEM, 1, 0);
@@ -1155,12 +1163,13 @@ private:
         }
 
         menu_letter hotkey;
-        for (mutation_type mut : muts)
+        for (mutation_type &mut : muts)
         {
             const string desc = mutation_desc(mut, -1, true,
                                               you.sacrifices[mut] != 0);
             MenuEntry* me = new MenuEntry(desc, MEL_ITEM, 1, hotkey);
             ++hotkey;
+            me->data = &mut;
             add_entry(me);
         }
 
@@ -2443,6 +2452,29 @@ bool delete_temp_mutation()
     }
 
     return false;
+}
+
+/// Attempt to look up a description of this mutation in the database.
+string get_mutation_desc(mutation_type mut)
+{
+    const char* const name = mutation_name(mut);
+    const string key = make_stringf("%s mutation", name);
+    const string lookup = getLongDescription(key);
+
+    ostringstream desc;
+    desc << lookup;
+    if (lookup.empty()) // Nothing found?
+        desc << "No description found.\n";
+
+    // TODO: consider adding other fun facts here
+        // current/max mutation level
+        // type of mutation (species, etc)
+        // if we tracked it: source (per level, I guess?)
+
+    const string quote = getQuoteString(key);
+    if (!quote.empty())
+        desc << "\n\n" << quote;
+    return desc.str();
 }
 
 const char* mutation_name(mutation_type mut, bool allow_category)
