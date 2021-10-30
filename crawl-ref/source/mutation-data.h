@@ -435,7 +435,7 @@ static const mutation_def mut_data[] =
 },
 
 { MUT_STRONG_STIFF, 0, 3, mutflag::good, false,
-  "strong stiff",
+  "stiff muscles",
 
   {"Your muscles are strong, but stiff. (Str +1, Dex -1)",
    "Your muscles are very strong, but stiff. (Str +2, Dex -2)",
@@ -451,7 +451,7 @@ static const mutation_def mut_data[] =
 },
 
 { MUT_FLEXIBLE_WEAK, 0, 3, mutflag::good, false,
-  "flexible weak",
+  "flexible muscles",
 
   {"Your muscles are flexible, but weak (Str -1, Dex +1).",
    "Your muscles are very flexible, but weak (Str -2, Dex +2).",
@@ -1664,7 +1664,7 @@ static const mutation_def mut_data[] =
 
   {"You are resistant to trampling.", "", ""},
   {"You feel steady.", "", ""},
-  {"You feel unsteady..", "", ""},
+  {"You feel unsteady.", "", ""},
 },
 
 { MUT_CLING, 0, 1, mutflag::good, true,
