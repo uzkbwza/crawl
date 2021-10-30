@@ -689,13 +689,6 @@ static bool _is_appendage_mutation(mutation_type mut)
     return false;
 }
 
-class MutationMenu : public Menu
-{
-private:
-    vector<string> fakemuts;
-
-};
-
 static vector<string> _get_form_fakemuts(bool terse)
 {
     vector<string> result;
@@ -974,49 +967,51 @@ static vector<string> _get_fakemuts(bool terse)
     return result;
 }
 
-
-static vector<string> _get_mutations(bool terse)
+static vector<mutation_type> _get_ordered_mutations()
 {
-    vector<string> result = _get_fakemuts(terse);
+    vector<mutation_type> muts;
 
     // First add (non-removable) inborn abilities and demon powers.
     for (int i = 0; i < NUM_MUTATIONS; i++)
     {
-        mutation_type mut_type = static_cast<mutation_type>(i);
-        if (_is_appendage_mutation(mut_type))
-            continue;
-        if (you.has_innate_mutation(mut_type))
-        {
-            result.push_back(terse ? _terse_mut_name(mut_type)
-                                   : mutation_desc(mut_type, -1, true,
-                                    ((you.sacrifices[i] != 0) ? true : false)));
-        }
+        mutation_type mut = static_cast<mutation_type>(i);
+        if (!_is_appendage_mutation(mut) && you.has_innate_mutation(mut))
+            muts.push_back(mut);
     }
 
     // Now add removable mutations.
     for (int i = 0; i < NUM_MUTATIONS; i++)
     {
-        mutation_type mut_type = static_cast<mutation_type>(i);
-        if (_is_appendage_mutation(mut_type))
-            continue;
-        if (you.get_base_mutation_level(mut_type, false, false, true) > 0
-            && !you.has_innate_mutation(mut_type)
-            && !you.has_temporary_mutation(mut_type))
+        mutation_type mut = static_cast<mutation_type>(i);
+        if (!_is_appendage_mutation(mut)
+            && you.get_base_mutation_level(mut, false, false, true) > 0
+            && !you.has_innate_mutation(mut)
+            && !you.has_temporary_mutation(mut))
         {
-            result.push_back(terse ? _terse_mut_name(mut_type)
-                                   : mutation_desc(mut_type, -1, true));
+            muts.push_back(mut);
         }
     }
 
     //Finally, temporary mutations.
     for (int i = 0; i < NUM_MUTATIONS; i++)
     {
-        mutation_type mut_type = static_cast<mutation_type>(i);
-        if (you.has_temporary_mutation(mut_type))
-        {
-            result.push_back(terse ? _terse_mut_name(mut_type)
-                                   : mutation_desc(mut_type, -1, true));
-        }
+        mutation_type mut = static_cast<mutation_type>(i);
+        if (you.has_temporary_mutation(mut))
+            muts.push_back(mut);
+    }
+
+    return muts;
+}
+
+
+static vector<string> _get_mutations_descs(bool terse)
+{
+    vector<string> result = _get_fakemuts(terse);
+    for (mutation_type mut : _get_ordered_mutations())
+    {
+        result.push_back(terse ? _terse_mut_name(mut)
+                               : mutation_desc(mut, -1, true,
+                                               you.sacrifices[mut] != 0));
     }
 
     return result;
@@ -1024,7 +1019,7 @@ static vector<string> _get_mutations(bool terse)
 
 string terse_mutation_list()
 {
-    const vector<string> mutations = _get_mutations(true);
+    const vector<string> mutations = _get_mutations_descs(true);
 
     if (mutations.empty())
         return "no striking features";
@@ -1052,7 +1047,7 @@ string describe_mutations(bool drop_title)
         result += "</white>\n\n";
     }
 
-    const vector<string> mutations = _get_mutations(false);
+    const vector<string> mutations = _get_mutations_descs(false);
 
     if (mutations.empty())
         result += "You are rather mundane.\n";
@@ -1131,8 +1126,49 @@ static string _display_vampire_attributes()
     return result;
 }
 
+class MutationMenu : public Menu
+{
+private:
+    vector<string> fakemuts;
+public:
+    MutationMenu()
+        : Menu(MF_SINGLESELECT | MF_ANYPRINTABLE | MF_ALLOW_FORMATTING),
+          fakemuts(_get_fakemuts(false))
+    {
+        set_highlighter(nullptr);
+        set_title(new MenuEntry("Innate Abilities, Weirdness & Mutations",
+                                MEL_TITLE));
+        update_entries();
+    }
+
+private:
+    void update_entries()
+    {
+        for (const auto &fakemut : fakemuts)
+        {
+            MenuEntry* me = new MenuEntry(fakemut, MEL_ITEM, 1, 0);
+            me->indent_no_hotkeys = true;
+            add_entry(me);
+        }
+
+        menu_letter hotkey;
+        for (mutation_type mut : _get_ordered_mutations())
+        {
+            const string desc = mutation_desc(mut, -1, true,
+                                              you.sacrifices[mut] != 0);
+            MenuEntry* me = new MenuEntry(desc, MEL_ITEM, 1, hotkey);
+            ++hotkey;
+            add_entry(me);
+        }
+    }
+};
+
 void display_mutations()
 {
+    MutationMenu mut_menu;
+    mut_menu.show();
+    return;
+
     string mutation_s = describe_mutations(true);
 
     string extra = "";
