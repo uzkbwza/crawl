@@ -2459,7 +2459,8 @@ string get_mutation_desc(mutation_type mut)
 {
     const char* const name = mutation_name(mut);
     const string key = make_stringf("%s mutation", name);
-    const string lookup = getLongDescription(key);
+    string lookup = getLongDescription(key);
+    hint_replace_cmds(lookup);
 
     ostringstream desc;
     desc << lookup;
@@ -2467,9 +2468,12 @@ string get_mutation_desc(mutation_type mut)
         desc << "No description found.\n";
 
     // TODO: consider adding other fun facts here
+        // whether this will be suppressed in forms
         // current/max mutation level
         // type of mutation (species, etc)
         // if we tracked it: source (per level, I guess?)
+        // gain/loss messages (to clarify to players when they get a
+        //                     confusing message)
 
     const string quote = getQuoteString(key);
     if (!quote.empty())
