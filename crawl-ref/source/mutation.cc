@@ -1145,15 +1145,17 @@ public:
 private:
     void update_entries()
     {
+        vector<mutation_type> muts = _get_ordered_mutations();
+
         for (const auto &fakemut : fakemuts)
         {
             MenuEntry* me = new MenuEntry(fakemut, MEL_ITEM, 1, 0);
-            me->indent_no_hotkeys = true;
+            me->indent_no_hotkeys = !muts.empty();
             add_entry(me);
         }
 
         menu_letter hotkey;
-        for (mutation_type mut : _get_ordered_mutations())
+        for (mutation_type mut : muts)
         {
             const string desc = mutation_desc(mut, -1, true,
                                               you.sacrifices[mut] != 0);
