@@ -1139,6 +1139,7 @@ public:
         set_title(new MenuEntry("Innate Abilities, Weirdness & Mutations",
                                 MEL_TITLE));
         update_entries();
+        update_more();
     }
 
 private:
@@ -1160,6 +1161,24 @@ private:
             ++hotkey;
             add_entry(me);
         }
+
+        if (items.empty())
+        {
+            add_entry(new MenuEntry("You are rather mundane.",
+                                    MEL_ITEM, 1, 0));
+        }
+    }
+
+    void update_more()
+    {
+        string extra = "";
+        if (_num_part_suppressed)
+            extra += "<brown>()</brown>  : Partially suppressed.\n";
+        if (_num_full_suppressed)
+            extra += "<darkgrey>(())</darkgrey>: Completely suppressed.\n";
+        if (_num_transient)
+            extra += "<magenta>[]</magenta>   : Transient mutations.";
+        set_more(extra);
     }
 };
 
