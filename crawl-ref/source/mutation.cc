@@ -2465,7 +2465,7 @@ string get_mutation_desc(mutation_type mut)
     ostringstream desc;
     desc << lookup;
     if (lookup.empty()) // Nothing found?
-        desc << "No description found.\n";
+        desc << mutation_desc(mut, -1, false) << "\n";
 
     // TODO: consider adding other fun facts here
         // whether this will be suppressed in forms

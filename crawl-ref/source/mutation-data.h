@@ -860,11 +860,11 @@ static const mutation_def mut_data[] =
 { MUT_STINGER, 8, 3, mutflag::good, true,
   "stinger",
 
-  {"Your tail ends in a poisonous barb.",
-   "Your tail ends in a sharp poisonous barb.",
-   "Your tail ends in a wickedly sharp and poisonous barb."},
+  {"Your tail ends in a venomous barb.",
+   "Your tail ends in a sharp venomous barb.",
+   "Your tail ends in a wickedly sharp and venomous barb."},
 
-  {"A poisonous barb forms on the end of your tail.",
+  {"A venomous barb forms on the end of your tail.",
    "The barb on your tail looks sharper.",
    "The barb on your tail looks very sharp."},
 
@@ -955,7 +955,7 @@ static const mutation_def mut_data[] =
 { MUT_CURL, 0, 1, mutflag::good, true,
   "reflexive curl",
 
-  {"You curl defensively after being hit.", "", ""},
+  {"You curl defensively after being hit. (AC +7*)", "", ""},
   {"You now curl defensively after being hit.", "", ""},
   {"", "", ""},
 },
