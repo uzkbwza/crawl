@@ -1123,8 +1123,7 @@ static string _display_vampire_attributes()
         result += "\n";
     }
 
-    trim_string_right(result);
-    return result;
+    return result + "\n";
 }
 
 class MutationMenu : public Menu
@@ -1132,11 +1131,13 @@ class MutationMenu : public Menu
 private:
     vector<string> fakemuts;
     vector<mutation_type> muts;
+    bool blood;
 public:
     MutationMenu()
         : Menu(MF_SINGLESELECT | MF_ANYPRINTABLE | MF_ALLOW_FORMATTING),
           fakemuts(_get_fakemuts(false)),
-          muts( _get_ordered_mutations())
+          muts( _get_ordered_mutations()),
+          blood(false)
     {
         set_highlighter(nullptr);
         set_title(new MenuEntry("Innate Abilities, Weirdness & Mutations",
@@ -1155,6 +1156,11 @@ public:
 private:
     void update_entries()
     {
+        if (blood) {
+            items.clear();
+            return;
+        }
+
         for (const auto &fakemut : fakemuts)
         {
             MenuEntry* me = new MenuEntry(fakemut, MEL_ITEM, 1, 0);
@@ -1183,13 +1189,38 @@ private:
     void update_more()
     {
         string extra = "";
-        if (_num_part_suppressed)
-            extra += "<brown>()</brown>  : Partially suppressed.\n";
-        if (_num_full_suppressed)
-            extra += "<darkgrey>(())</darkgrey>: Completely suppressed.\n";
-        if (_num_transient)
-            extra += "<magenta>[]</magenta>   : Transient mutations.";
+        if (blood)
+        {
+            extra = _display_vampire_attributes();
+        }
+        else
+        {
+            if (_num_part_suppressed)
+                extra += "<brown>()</brown>  : Partially suppressed.\n";
+            if (_num_full_suppressed)
+                extra += "<darkgrey>(())</darkgrey>: Completely suppressed.\n";
+            if (_num_transient)
+                extra += "<magenta>[]</magenta>   : Transient mutations.";
+        }
+        if (you.has_mutation(MUT_VAMPIRISM))
+            extra += _vampire_Ascreen_footer(!blood);
         set_more(extra);
+    }
+
+    virtual bool process_key(int keyin) override
+    {
+        switch (keyin)
+        {
+        case '!':
+        case '^':
+        case CK_MOUSE_CMD:
+            blood = !blood;
+            update_entries();
+            update_more();
+            return true;
+        default:
+            return Menu::process_key(keyin);
+        }
     }
 };
 
@@ -1197,102 +1228,6 @@ void display_mutations()
 {
     MutationMenu mut_menu;
     mut_menu.show();
-    return;
-
-    string mutation_s = describe_mutations(true);
-
-    string extra = "";
-    if (_num_part_suppressed)
-        extra += "<brown>()</brown>  : Partially suppressed.\n";
-    if (_num_full_suppressed)
-        extra += "<darkgrey>(())</darkgrey>: Completely suppressed.\n";
-    if (_num_transient)
-        extra += "<magenta>[]</magenta>   : Transient mutations.";
-
-    if (!extra.empty())
-    {
-        mutation_s += "\n\n\n\n";
-        mutation_s += extra;
-    }
-    trim_string_right(mutation_s);
-
-    auto vbox = make_shared<Box>(Widget::VERT);
-    vbox->set_cross_alignment(Widget::STRETCH);
-
-    const char *title_text = "Innate Abilities, Weirdness & Mutations";
-    auto title = make_shared<Text>(formatted_string(title_text, WHITE));
-    auto title_hbox = make_shared<Box>(Widget::HORZ);
-    title_hbox->add_child(move(title));
-    title_hbox->set_main_alignment(Widget::CENTER);
-    vbox->add_child(move(title_hbox));
-
-    auto switcher = make_shared<Switcher>();
-
-    const string vamp_s = you.has_mutation(MUT_VAMPIRISM)
-                                        ?_display_vampire_attributes()
-                                        : "N/A";
-    const string descs[3] =  { mutation_s, vamp_s };
-    for (int i = 0; i < 2; i++)
-    {
-        auto scroller = make_shared<Scroller>();
-        auto text = make_shared<Text>(formatted_string::parse_string(
-                descs[static_cast<int>(i)]));
-        text->set_wrap_text(true);
-        scroller->set_child(text);
-        switcher->add_child(move(scroller));
-    }
-
-    switcher->current() = 0;
-    switcher->set_margin_for_sdl(20, 0, 0, 0);
-    switcher->set_margin_for_crt(1, 0, 0, 0);
-    switcher->expand_h = false;
-    switcher->align_x = Widget::STRETCH;
-#ifdef USE_TILE_LOCAL
-    switcher->max_size().width = tiles.get_crt_font()->char_width()*80;
-#endif
-    vbox->add_child(switcher);
-
-    auto bottom = make_shared<Text>(_vampire_Ascreen_footer(true));
-    bottom->set_margin_for_sdl(20, 0, 0, 0);
-    bottom->set_margin_for_crt(1, 0, 0, 0);
-    if (you.has_mutation(MUT_VAMPIRISM))
-        vbox->add_child(bottom);
-
-    auto popup = make_shared<ui::Popup>(vbox);
-
-    bool done = false;
-    int lastch;
-    popup->on_keydown_event([&](const KeyEvent& ev) {
-        lastch = ev.key();
-        if (you.has_mutation(MUT_VAMPIRISM)
-            && (lastch == '!' || lastch == CK_MOUSE_CMD || lastch == '^'))
-        {
-            int& c = switcher->current();
-
-            bottom->set_text(_vampire_Ascreen_footer(c));
-
-            c = 1 - c;
-#ifdef USE_TILE_WEB
-            tiles.json_open_object();
-            tiles.json_write_int("pane", c);
-            tiles.ui_state_change("mutations", 0);
-#endif
-        }
-        else
-            done = !switcher->current_widget()->on_event(ev);
-        return true;
-    });
-
-#ifdef USE_TILE_WEB
-    tiles.json_open_object();
-    tiles.json_write_string("mutations", mutation_s);
-    if (you.has_mutation(MUT_VAMPIRISM))
-        tiles.json_write_bool("vampire_alive", you.vampire_alive);
-    tiles.push_ui_layout("mutations", 1);
-    popup->on_layout_pop([](){ tiles.pop_ui_layout(); });
-#endif
-
-    ui::run_layout(move(popup), done);
 }
 
 static int _calc_mutation_amusement_value(mutation_type which_mutation)
