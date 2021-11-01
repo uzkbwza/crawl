@@ -1058,16 +1058,15 @@ string describe_mutations(bool drop_title)
     return result;
 }
 
-static formatted_string _vampire_Ascreen_footer(bool first_page)
+static string _vampire_Ascreen_footer(bool first_page)
 {
     const char *text = first_page ? "<w>Mutations</w>|Blood properties"
                                   : "Mutations|<w>Blood properties</w>";
-    const string fmt = make_stringf("[<w>!</w>/<w>^</w>"
+    return make_stringf("[<w>!</w>/<w>^</w>"
 #ifdef USE_TILE_LOCAL
             "|<w>Right-click</w>"
 #endif
             "]: %s", text);
-    return formatted_string::parse_string(fmt);
 }
 
 static string _display_vampire_attributes()
@@ -1157,7 +1156,7 @@ private:
     void update_entries()
     {
         if (blood) {
-            items.clear();
+            deleteAll(items);
             return;
         }
 
