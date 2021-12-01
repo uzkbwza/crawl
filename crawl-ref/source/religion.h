@@ -129,6 +129,7 @@ bool is_follower(const monster& mon);
 
 // Vehumet gift interface.
 bool vehumet_is_offering(spell_type spell);
+bool vehumet_exclusive_offer(spell_type spell);
 void vehumet_accept_gift(spell_type spell);
 
 mgen_data hepliaklqana_ancestor_gen_data();

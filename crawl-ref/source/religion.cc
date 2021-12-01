@@ -1205,6 +1205,11 @@ bool vehumet_is_offering(spell_type spell)
     return you.vehumet_gifts.count(spell);
 }
 
+bool vehumet_exclusive_offer(spell_type spell)
+{
+    return vehumet_is_offering(spell) && !you.spell_library[spell];
+}
+
 void vehumet_accept_gift(spell_type spell)
 {
     if (vehumet_is_offering(spell))
