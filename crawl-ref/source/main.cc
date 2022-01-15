@@ -1770,7 +1770,6 @@ static void _do_display_map()
 static void _do_cycle_quiver(int dir)
 {
     const bool changed = you.quiver_action.cycle(dir);
-    you.launcher_action.set(you.quiver_action.get());
     quiver::set_needs_redraw();
 
     const bool valid = you.quiver_action.get()->is_valid();
