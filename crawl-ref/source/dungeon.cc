@@ -1583,11 +1583,11 @@ static int _num_items_wanted(int absdepth0)
     if (branches[you.where_are_you].branch_flags & brflag::no_items)
         return 0;
     else if (absdepth0 > 5 && one_chance_in(500 - 5 * absdepth0))
-        return 10 + random2avg(85, 2); // rich level!
+        return 9 + random2avg(80, 2); // rich level!
     else if (absdepth0 < 3)
-        return 3 + roll_dice(3, 7); // thin loot on early floors
+        return 2 + roll_dice(3, 7); // thin loot on early floors
     else
-        return 3 + roll_dice(3, 10);
+        return 3 + roll_dice(3, 9);
 }
 
 static int _mon_die_size()
