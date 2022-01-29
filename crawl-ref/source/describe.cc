@@ -2317,29 +2317,26 @@ string get_item_description(const item_def &item,
 
     if (!verbose && item.cursed())
         description << _describe_item_curse(item);
-    else
+    else if (verbose && mode != IDM_MONSTER)
     {
-        if (verbose)
-        {
-            if (need_extra_line)
-                description << "\n";
-            if (item.cursed())
-                description << _describe_item_curse(item);
+        if (need_extra_line)
+            description << "\n";
+        if (item.cursed())
+            description << _describe_item_curse(item);
 
-            if (is_artefact(item))
+        if (is_artefact(item))
+        {
+            if (item.base_type == OBJ_ARMOUR
+                || item.base_type == OBJ_WEAPONS)
             {
-                if (item.base_type == OBJ_ARMOUR
-                    || item.base_type == OBJ_WEAPONS)
-                {
-                    description << "\nThis ancient artefact cannot be changed "
-                        "by magic or mundane means.";
-                }
-                // Randart jewellery has already displayed this line.
-                else if (item.base_type != OBJ_JEWELLERY
-                         || (item_type_known(item) && is_unrandom_artefact(item)))
-                {
-                    description << "\nIt is an ancient artefact.";
-                }
+                description << "\nThis ancient artefact cannot be changed "
+                    "by magic or mundane means.";
+            }
+            // Randart jewellery has already displayed this line.
+            else if (item.base_type != OBJ_JEWELLERY
+                     || (item_type_known(item) && is_unrandom_artefact(item)))
+            {
+                description << "\nIt is an ancient artefact.";
             }
         }
     }

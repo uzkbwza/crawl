@@ -664,18 +664,23 @@ static bool _try_print_item(string target)
         return false;
 
     const item_spec spec = ilist.get_item(0);
-    if (spec.base_type >= NUM_OBJECT_CLASSES
-        || spec.sub_type == OBJ_RANDOM)
-    {
-        return false;
-    }
-
     item_def it;
-    it.base_type = spec.base_type;
-    it.sub_type = spec.sub_type;
-    it.plus = spec.plus;
-    it.plus2 = spec.plus2;
-    it.special = spec.ego;
+    if (spec.ego < SP_FORBID_EGO)
+        make_item_unrandart(it, -spec.ego);
+    else
+    {
+        if (spec.base_type >= NUM_OBJECT_CLASSES
+            || spec.sub_type == OBJ_RANDOM)
+        {
+            return false;
+        }
+
+        it.base_type = spec.base_type;
+        it.sub_type = spec.sub_type;
+        it.plus = spec.plus;
+        it.plus2 = spec.plus2;
+        it.special = spec.ego;
+    }
 
     it.quantity = 1;
     it.rnd = 1;
