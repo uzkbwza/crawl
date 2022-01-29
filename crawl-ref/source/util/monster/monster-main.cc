@@ -681,7 +681,11 @@ static bool _try_print_item(string target)
     it.rnd = 1;
     set_ident_flags(it, ISFLAG_IDENT_MASK);
 
-    printf("%s", get_item_description(it, IDM_MONSTER).c_str());
+    string desc = get_item_description(it, IDM_MONSTER).c_str();
+    desc = trim_string(desc);
+    desc = replace_all(desc, "\n\n", " | ");
+    desc = replace_all(desc, "\n", " | ");
+    printf("%s", desc.c_str());
     return true;
 }
 

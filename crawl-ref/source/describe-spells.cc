@@ -708,3 +708,25 @@ string describe_item_spells(const item_def &item)
     describe_spellset(item_spellset(item), &item, description);
     return description.tostring();
 }
+
+/**
+ * Return a one-line description of the spells in the given item.
+ *
+ * @param item      The book in question.
+ * @return          A one-line listing of the spells in the given item,
+ *                  including names, schools & levels.
+ */
+string terse_spell_list(const item_def &item)
+{
+    vector<string> spell_descs;
+    for (auto spell : spells_in_book(item))
+    {
+        spell_descs.push_back(make_stringf("%s (L%d %s)",
+                                           spell_title(spell),
+                                           spell_difficulty(spell),
+                                           _spell_schools(spell).c_str()));
+    }
+    // could use comma_separated_fn and skip the intervening vec?
+    return "Spells: " + comma_separated_line(spell_descs.begin(),
+                                             spell_descs.end());
+}

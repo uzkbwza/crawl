@@ -2192,20 +2192,18 @@ string get_item_description(const item_def &item,
         break;
 
     case OBJ_BOOKS:
-        if ((!verbose && is_random_artefact(item)) || mode == IDM_MONSTER)
+        if (mode == IDM_MONSTER)
         {
-            string spell_desc = describe_item_spells(item);
-            if (spell_desc.empty() && desc.empty())
+            description << desc << terse_spell_list(item);
+            need_extra_line = false;
+        }
+        else if (!verbose && is_random_artefact(item))
+        {
+            desc += describe_item_spells(item);
+            if (desc.empty())
                 need_extra_line = false;
             else
-            {
-                if (mode == IDM_MONSTER)
-                {
-                    need_extra_line = false;
-                    trim_string(spell_desc);
-                }
-                description << desc << spell_desc;
-            }
+                description << desc;
         }
         break;
 
