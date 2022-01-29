@@ -529,7 +529,9 @@ static void _describe_book(const spellbook_contents &book,
     if (source_item)
     {
         description.cprintf(
-            "\n Spells                            Type                      Level       Known");
+            "\n Spells                            Type                      Level");
+        if (crawl_state.need_save)
+            description.cprintf("       Known");
     }
     description.cprintf("\n");
 
@@ -599,7 +601,7 @@ static void _describe_book(const spellbook_contents &book,
                          _spell_schools(spell);
 
         string known = "";
-        if (!mon_owner)
+        if (!mon_owner && crawl_state.need_save)
             known = you.spell_library[spell] ? "         yes" : "          no";
 
         description.cprintf("%s%d%s\n",

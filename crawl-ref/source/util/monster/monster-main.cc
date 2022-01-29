@@ -8,10 +8,13 @@
 #include "fake-main.hpp"
 
 #include "coordit.h"
+#include "describe.h" // get_item_description
 #include "fight.h" // spines_damage
 #include "item-name.h"
 #include "item-prop.h"
+#include "item-status-flag-type.h" // ISFLAG_IDENT_MASK
 #include "los.h"
+#include "mapdef.h" // item_list
 #include "message.h"
 #include "mon-explode.h" // ball_lightning_damage
 #include "mon-project.h"
@@ -650,6 +653,38 @@ static mons_spec _get_vault_monster(string monster_name, string* vault_spec)
 
     return no_monster;
 }
+
+static bool _try_print_item(string target)
+{
+    trim_string(target);
+
+    item_list ilist;
+    const string err = ilist.add_item(target, false);
+    if (!err.empty())
+        return false;
+
+    const item_spec spec = ilist.get_item(0);
+    if (spec.base_type >= NUM_OBJECT_CLASSES
+        || spec.sub_type == OBJ_RANDOM)
+    {
+        return false;
+    }
+
+    item_def it;
+    it.base_type = spec.base_type;
+    it.sub_type = spec.sub_type;
+    it.plus = spec.plus;
+    it.plus2 = spec.plus2;
+    it.special = spec.ego;
+
+    it.quantity = 1;
+    it.rnd = 1;
+    set_ident_flags(it, ISFLAG_IDENT_MASK);
+
+    printf("%s", get_item_description(it, IDM_MONSTER).c_str());
+    return true;
+}
+
 static string canned_reports[][2] = {
     {"cang", ("cang (" + colour(LIGHTRED, "Ω")
               + (") | Spd: c | HD: i | HP: 666 | AC/EV: e/π | Dam: 999"
@@ -734,10 +769,14 @@ int main(int argc, char* argv[])
         if (spec_type < 0 || spec_type >= NUM_MONSTERS
             || spec_type == MONS_PLAYER_GHOST)
         {
-            if (err.empty())
-                printf("unknown monster: \"%s\"\n", target.c_str());
-            else
+            // This doesn't work as a monster. But maybe as an item?
+            if (_try_print_item(orig_target))
+                return 0;
+
+            if (!err.empty())
                 printf("%s\n", err.c_str());
+            else
+                printf("unknown monster/item: \"%s\"\n", target.c_str());
             return 1;
         }
 
