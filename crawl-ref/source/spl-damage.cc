@@ -2493,7 +2493,7 @@ static int _discharge_monsters(const coord_def &where, int pow,
     // Recursion to give us chain-lightning
     if (remaining > 0)
     {
-        damage += apply_random_around_square([pow, &agent, remaining] 
+        damage += apply_random_around_square([pow, &agent, remaining]
                                             (coord_def where2) {
             return _discharge_monsters(where2, pow, agent, remaining -1);
         }, where, true, 1);
@@ -2552,7 +2552,7 @@ spret cast_discharge(int pow, const actor &agent, bool fail, bool prompt)
     const int num_targs = 1 + random2(2 + div_rand_round(pow,20));
     const int dam =
         apply_random_around_square([pow, &agent] (coord_def target) {
-            return _discharge_monsters(target, pow, agent, 
+            return _discharge_monsters(target, pow, agent,
                         1 + random2(2 + div_rand_round(pow, 20)));
         }, agent.pos(), true, num_targs);
 
