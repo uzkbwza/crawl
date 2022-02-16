@@ -659,7 +659,14 @@ static bool _try_print_item(string target)
     trim_string(target);
 
     item_list ilist;
-    const string err = ilist.add_item(target, false);
+    auto prefixes = { "", "book of ", "book of the " };
+    string err = "";
+    for (string prefix : prefixes)
+    {
+        err = ilist.add_item(prefix + target, false);
+        if (err.empty())
+            break;
+    }
     if (!err.empty())
         return false;
 
