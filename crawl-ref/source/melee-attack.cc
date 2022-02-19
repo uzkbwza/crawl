@@ -3673,11 +3673,17 @@ string aux_attack_desc(mutation_type mut)
 string AuxAttackType::describe() const
 {
     const int to_hit = aux_to_hit();
+    string to_hit_pips = "";
+    for (int i = 0; i < to_hit / 10; ++i)
+    {
+        to_hit_pips += "+";
+        if (i % 5 == 4)
+            to_hit_pips += " ";
+    }
     return make_stringf("\nTrigger chance:  %d%%\n"
-                          "Accuracy:       %s%d\n"
+                          "Accuracy:        %s\n"
                           "Base damage:     %d\n\n",
                         get_chance(),
-                        to_hit >= 0 ? " " : "",
-                        to_hit,
+                        to_hit_pips.c_str(),
                         get_damage());
 }
