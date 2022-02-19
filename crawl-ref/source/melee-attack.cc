@@ -3674,6 +3674,9 @@ string AuxAttackType::describe() const
 {
     const int to_hit = aux_to_hit();
     string to_hit_pips = "";
+    // Each pip is 10 to-hit. Since to-hit is rolled before we compare it to
+    // defender evasion, for these pips to be comparable to monster EV pips,
+    // these need to be twice as large.
     for (int i = 0; i < to_hit / 10; ++i)
     {
         to_hit_pips += "+";
