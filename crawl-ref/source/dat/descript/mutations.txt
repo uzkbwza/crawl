@@ -668,10 +668,7 @@ shaped, preventing you from wearing an extra set of gloves or magical rings.
 retaliatory headbutt mutation
 
 When a foe misses you in melee, you may reflexively retaliate, attempting to
-gore your attacker with your horns. The chances of a successful hit are
-determined by experience level, with up to a 50% chance of success at XL 27. If
-successful, the amount of damage is determined primarily by the size of horns,
-Strength, Fighting skill, and any slaying bonuses.
+gore your attacker with your horns.
 %%%%
 multi-lived mutation
 

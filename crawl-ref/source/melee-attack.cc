@@ -3212,6 +3212,11 @@ void melee_attack::emit_foul_stench()
     }
 }
 
+static int _minotaur_headbutt_chance()
+{
+    return 23 + you.experience_level;
+}
+
 void melee_attack::do_minotaur_retaliation()
 {
     if (!defender->is_player())
@@ -3250,37 +3255,32 @@ void melee_attack::do_minotaur_retaliation()
         // You are in a non-minotaur form.
         return;
     }
-    // This will usually be 2, but could be 3 if the player mutated more.
-    const int mut = you.get_mutation_level(MUT_HORNS);
 
-    if (x_chance_in_y(45 + you.experience_level * 2, 200))
+    if (!x_chance_in_y(_minotaur_headbutt_chance(), 100))
+        return;
+
+    // Use the same damage formula as a regular headbutt.
+    int dmg = AUX_HEADBUTT.get_damage();
+    dmg = player_stat_modify_damage(dmg);
+    dmg = random2(dmg);
+    dmg = player_apply_fighting_skill(dmg, true);
+    dmg = player_apply_misc_modifiers(dmg);
+    dmg = player_apply_slaying_bonuses(dmg, true);
+    dmg = player_apply_final_multipliers(dmg, true);
+    int hurt = attacker->apply_ac(dmg);
+
+    mpr("You furiously retaliate!");
+    dprf(DIAG_COMBAT, "Retaliation: dmg = %d hurt = %d", dmg, hurt);
+    if (hurt <= 0)
     {
-        // Use the same damage formula as a regular headbutt.
-        int dmg = 5 + mut * 3;
-        dmg = player_stat_modify_damage(dmg);
-        dmg = random2(dmg);
-        dmg = player_apply_fighting_skill(dmg, true);
-        dmg = player_apply_misc_modifiers(dmg);
-        dmg = player_apply_slaying_bonuses(dmg, true);
-        dmg = player_apply_final_multipliers(dmg, true);
-        int hurt = attacker->apply_ac(dmg);
-
-        mpr("You furiously retaliate!");
-        dprf(DIAG_COMBAT, "Retaliation: dmg = %d hurt = %d", dmg, hurt);
-        if (hurt <= 0)
-        {
-            mprf("You headbutt %s, but do no damage.",
-                 attacker->name(DESC_THE).c_str());
-            return;
-        }
-        else
-        {
-            mprf("You headbutt %s%s",
-                 attacker->name(DESC_THE).c_str(),
-                 attack_strength_punctuation(hurt).c_str());
-            attacker->hurt(&you, hurt);
-        }
+        mprf("You headbutt %s, but do no damage.",
+             attacker->name(DESC_THE).c_str());
+        return;
     }
+    mprf("You headbutt %s%s",
+         attacker->name(DESC_THE).c_str(),
+         attack_strength_punctuation(hurt).c_str());
+    attacker->hurt(&you, hurt);
 }
 
 /** For UNRAND_STARLIGHT's dazzle effect, only against monsters.
@@ -3683,6 +3683,11 @@ string aux_attack_desc(mutation_type mut)
         return AUX_BITE.describe();
     case MUT_DEMONIC_TOUCH:
         return AUX_TOUCH.describe();
+    case MUT_REFLEXIVE_HEADBUTT:
+        return make_stringf("\nTrigger chance:  %d%%\n"
+                              "Base damage:     %d\n\n",
+                            _minotaur_headbutt_chance(),
+                            AUX_HEADBUTT.get_damage());
     default:
         return "";
     }
