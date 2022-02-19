@@ -3481,6 +3481,7 @@ bool melee_attack::_extra_aux_attack(unarmed_attack_type atk)
        return false;
     }
 
+    // XXX: dedup with aux_attack_desc()
     switch (atk)
     {
     case UNAT_CONSTRICT:
@@ -3661,10 +3662,27 @@ bool melee_attack::_vamp_wants_blood_from_monster(const monster* mon)
 
 string aux_attack_desc(mutation_type mut)
 {
+    // XXX: dedup with _extra_aux_attack()
     switch (mut)
     {
+    case MUT_HOOVES:
+    case MUT_TALONS:
+    case MUT_TENTACLE_SPIKE:
+        return AUX_KICK.describe();
+    case MUT_BEAK:
+        return AUX_PECK.describe();
     case MUT_HORNS:
         return AUX_HEADBUTT.describe();
+    case MUT_STINGER:
+    case MUT_ARMOURED_TAIL:
+    case MUT_WEAKNESS_STINGER:
+    case MUT_MERTAIL:
+        return AUX_TAILSLAP.describe();
+    case MUT_ACIDIC_BITE:
+    case MUT_ANTIMAGIC_BITE:
+        return AUX_BITE.describe();
+    case MUT_DEMONIC_TOUCH:
+        return AUX_TOUCH.describe();
     default:
         return "";
     }
