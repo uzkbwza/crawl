@@ -125,12 +125,10 @@ drawing attention to your activities.
 # ------ Auxes -----
 horns mutation
 
-You have horns on your head. These allow you to gore foes on about {{
-    return math.floor(((100 * (you.xl() + 30)) / 59) * 2 / 3)
-}}% of melee attacks, increasing with your XL. If they hit, these gore attacks
-have base damage 5 + 3 * mutation level. The horns prevent you from wearing
-helmets, and the third level of this mutation prevents you from wearing any
-type of headgear.
+You have horns on your head, allowing you to try to gore foes when launching
+melee attacks, but preventing you from wearing helmets. Each level of this mutation
+increases the damage of your gore attacks. The third level of this mutation
+prevents you from wearing any type of headgear.
 %%%%
 beak mutation
 

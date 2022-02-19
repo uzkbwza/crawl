@@ -896,6 +896,7 @@ public:
     }
     virtual int get_base_chance() const { return chance; }
     virtual bool xl_based_chance() const { return true; }
+    virtual string describe() const;
 protected:
     const int damage;
     // Per-attack trigger percent, before accounting for XL.
@@ -1243,7 +1244,7 @@ bool melee_attack::player_aux_unarmed()
         if (atk == UNAT_CONSTRICT && !attacker->can_constrict(defender, true))
             continue;
 
-        to_hit = random2(calc_your_to_hit_aux_unarmed());
+        to_hit = random2(aux_to_hit());
         to_hit += post_roll_to_hit_modifiers(to_hit, false, true);
 
         handle_noise(defender->pos());
@@ -3527,31 +3528,6 @@ bool melee_attack::_extra_aux_attack(unarmed_attack_type atk)
     }
 }
 
-// TODO: Potentially move this, may or may not belong here (may not
-// even belong as its own function, could be integrated with the general
-// to-hit method
-// Returns the to-hit for your extra unarmed attacks.
-// DOES NOT do the final roll (i.e., random2(your_to_hit)).
-int melee_attack::calc_your_to_hit_aux_unarmed()
-{
-    int your_to_hit;
-
-    your_to_hit = 1300
-                + you.dex() * 75
-                + you.skill(SK_FIGHTING, 30);
-    your_to_hit /= 100;
-
-    if (you.get_mutation_level(MUT_EYEBALLS))
-        your_to_hit += 2 * you.get_mutation_level(MUT_EYEBALLS) + 1;
-
-    if (you.duration[DUR_VERTIGO])
-        your_to_hit -= 5;
-
-    your_to_hit += slaying_bonus();
-
-    return your_to_hit;
-}
-
 bool melee_attack::using_weapon() const
 {
     return weapon && is_melee_weapon(*weapon);
@@ -3681,4 +3657,27 @@ bool melee_attack::_vamp_wants_blood_from_monster(const monster* mon)
            && !you.vampire_alive
            && actor_is_susceptible_to_vampirism(*mon)
            && mons_has_blood(mon->type);
+}
+
+string aux_attack_desc(mutation_type mut)
+{
+    switch (mut)
+    {
+    case MUT_HORNS:
+        return AUX_HEADBUTT.describe();
+    default:
+        return "";
+    }
+}
+
+string AuxAttackType::describe() const
+{
+    const int to_hit = aux_to_hit();
+    return make_stringf("\nTrigger chance:  %d%%\n"
+                          "Accuracy:       %s%d\n"
+                          "Base damage:     %d\n\n",
+                        get_chance(),
+                        to_hit >= 0 ? " " : "",
+                        to_hit,
+                        get_damage());
 }
