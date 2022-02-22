@@ -1041,6 +1041,13 @@ spret cast_airstrike(int pow, coord_def target, bool fail)
     return spret::success;
 }
 
+// maximum damage before accounting for empty space
+// used for damage display
+int airstrike_base_max_damage(int pow)
+{
+    return 6 + (pow + 6) / 7;
+}
+
 dice_def base_fragmentation_damage(int pow)
 {
     return dice_def(3, 5 + pow / 5);

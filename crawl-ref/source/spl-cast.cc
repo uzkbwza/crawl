@@ -2774,6 +2774,11 @@ string spell_damage_string(spell_type spell, bool evoked)
             int max = discharge_max_damage(_spell_power(spell, evoked));
             return make_stringf("3-%d/arc", max);
         }
+        case SPELL_AIRSTRIKE:
+        {
+            int max = airstrike_base_max_damage(_spell_power(spell, evoked));
+            return make_stringf("5+-%d+", max);
+        }
         default:
             break;
     }
