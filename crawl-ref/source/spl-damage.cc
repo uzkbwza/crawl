@@ -2579,6 +2579,11 @@ spret cast_discharge(int pow, const actor &agent, bool fail, bool prompt)
     return spret::success;
 }
 
+int discharge_max_damage(int pow)
+{
+    return 6 + (pow + 7) / 8;
+}
+
 pair<int, item_def *> sandblast_find_ammo()
 {
     item_def *stone = nullptr;

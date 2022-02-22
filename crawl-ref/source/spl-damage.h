@@ -53,6 +53,7 @@ spret cast_poisonous_vapours(int pow, const dist &beam, bool fail, bool test=fal
 bool safe_discharge(coord_def where, vector<const actor *> &exclude);
 spret cast_discharge(int pow, const actor &agent, bool fail = false,
                           bool prompt = true);
+int discharge_max_damage(int pow);
 dice_def base_fragmentation_damage(int pow);
 bool setup_fragmentation_beam(bolt &beam, int pow, const actor *caster,
                               const coord_def target, bool quiet,
