@@ -5510,7 +5510,7 @@ void mons_cast(monster* mons, bolt pbolt, spell_type spell_cast,
 
         empty_space = max(3, empty_space);
 
-        int damage_taken = 5 + empty_space
+        int damage_taken = FLAT_AIRSTRIKE_DAMAGE + empty_space
                          + random2avg(2 + div_rand_round(splpow, 7),
                                       empty_space);
         damage_taken = foe->beam_resists(pbolt, damage_taken, false);

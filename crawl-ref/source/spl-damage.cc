@@ -991,6 +991,8 @@ int airstrike_space_around(coord_def target, bool count_unseen)
     return empty_space;
 }
 
+static const int AIRSTRIKE_POWER_DIV = 7;
+
 spret cast_airstrike(int pow, coord_def target, bool fail)
 {
     if (cell_is_solid(target))
@@ -1022,7 +1024,9 @@ spret cast_airstrike(int pow, coord_def target, bool fail)
 
     const int empty_space = airstrike_space_around(target, true);
 
-    int hurted = 5 + empty_space + random2avg(2 + div_rand_round(pow, 7), 2);
+    int hurted = FLAT_AIRSTRIKE_DAMAGE
+                 + empty_space
+                 + random2avg(2 + div_rand_round(pow, AIRSTRIKE_POWER_DIV), 2);
 #ifdef DEBUG_DIAGNOSTICS
     const int preac = hurted;
 #endif
@@ -1045,7 +1049,9 @@ spret cast_airstrike(int pow, coord_def target, bool fail)
 // used for damage display
 int airstrike_base_max_damage(int pow)
 {
-    return 6 + (pow + 6) / 7;
+    return FLAT_AIRSTRIKE_DAMAGE
+          + 1
+          + (pow + AIRSTRIKE_POWER_DIV - 1) / AIRSTRIKE_POWER_DIV;
 }
 
 dice_def base_fragmentation_damage(int pow)
@@ -2438,7 +2444,8 @@ static int _discharge_monsters(const coord_def &where, int pow,
         return 0;
 
     int damage = (&agent == victim) ? 1 + random2(2 + div_rand_round(pow,15))
-                                    : 3 + random2(4 + div_rand_round(pow,8));
+                                    : FLAT_DISCHARGE_ARC_DAMAGE
+                                      + random2(4 + div_rand_round(pow,8));
 
     bolt beam;
     beam.flavour    = BEAM_ELECTRICITY; // used for mons_adjust_flavoured

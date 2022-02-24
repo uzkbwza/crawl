@@ -13,6 +13,9 @@ struct dice_def;
 class dist;
 
 const int DEFAULT_SHATTER_DICE = 3;
+const int FLAT_AIRSTRIKE_DAMAGE = 5;
+const int FLAT_DISCHARGE_ARC_DAMAGE = 3;
+
 #define COUPLING_TIME_KEY "maxwells_charge_time"
 #define FLAME_WAVE_KEY "flame_waves"
 #define FLAME_WAVE_POWER_KEY "flame_wave_power"
