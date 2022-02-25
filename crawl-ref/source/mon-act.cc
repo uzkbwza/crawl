@@ -3136,6 +3136,7 @@ void launch_opportunity_attack(monster& mons)
     if (_handle_ru_melee_redirection(mons, &ru_target))
         return;
     _melee_attack_player(mons, ru_target, true);
+    learned_something_new(HINT_OPPORTUNITY_ATTACK);
 }
 
 static bool _do_move_monster(monster& mons, const coord_def& delta)
