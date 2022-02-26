@@ -1658,7 +1658,7 @@ void learned_something_new(hints_event_type seen_what, coord_def gc)
         break;
 
     case HINT_OPPORTUNITY_ATTACK:
-        text << "When you move away from an enemy, they have a small (1/5) "
+        text << "When you move away from an enemy, they have a small (1/3) "
                 "chance of taking advantage and launching a free attack. "
                 "Repositioning and retreating is often still good, but keep "
                 "an eye out for those extra attacks.";

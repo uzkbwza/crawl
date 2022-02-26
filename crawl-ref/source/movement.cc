@@ -252,7 +252,7 @@ static void _trigger_opportunity_attacks(coord_def new_pos)
             || !mon->can_see(you)
             // no attacks from monsters that just did a slow action
             || mon->speed_increment - mon->energy_cost(EUT_ATTACK) < 60 /*?*/
-            || !one_chance_in(5))
+            || !one_chance_in(3))
         {
             continue;
         }
